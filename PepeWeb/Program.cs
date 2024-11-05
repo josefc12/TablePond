@@ -1,17 +1,25 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using PepeWeb.Components;
 using PepeWeb.Components.Account;
 using PepeWeb.Data;
+using PepeWeb.Data.Mapper;
+using PepeWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAutoMapper(typeof(DefaultMappingProfile));
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<WeatherService>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();

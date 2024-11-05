@@ -1,0 +1,51 @@
+﻿@page "/table"
+
+@using Microsoft.AspNetCore.Authorization
+@using PepeWeb.Data.DTO;
+
+@inject PepeWeb.Services.WeatherService weatherService
+
+@attribute [StreamRendering]
+@attribute [Authorize]
+
+<PageTitle>Auth</PageTitle>
+
+<h1>Table name</h1>
+
+<AuthorizeView>
+    <Authorized>
+        
+        <ul>
+            @if (forecasts != null && forecasts.Any())
+            {
+                foreach (var name in forecasts)
+                {
+                    <li>@name</li>
+                }
+            }
+            else
+            {
+                <li>No tables available.</li>
+            }
+        </ul>
+
+    </Authorized>
+    <NotAuthorized>
+        You are not authorized to view this content. Please log in.
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<string>? forecasts = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var forecastsRaw = await weatherService.Get();
+        foreach (TableDTO fore in forecastsRaw)
+        {
+            forecasts.Add(fore.Name);
+        }
+    }
+
+}
