@@ -1,0 +1,57 @@
+﻿@page "/Account/Manage/Invite"
+
+@using System.ComponentModel.DataAnnotations
+
+@inject IdentityUserAccessor UserAccessor
+
+<PageTitle>Create Invite</PageTitle>
+
+<StatusMessage />
+<h3>Create Invite</h3>
+
+<div class="row">
+    <div class="col-md-6">
+        <p>Invite another person to use this app</p>
+        <StatusMessage Message="@errorMessage" />
+        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="InviteUser" FormName="invite" >
+             <DataAnnotationsValidator />
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Email" class="form-control" aria-required="true" placeholder="name@example.com" />
+                <label for="email">Email</label>
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Invite</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private string? errorMessage;
+
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    [SupplyParameterFromForm]
+    private InputModel Input { get; set; } = new();
+
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+    }
+
+    private async Task InviteUser(EditContext editContext)
+    {
+        
+    }
+
+    private sealed class InputModel
+    {
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = "";
+    }
+
+}
