@@ -1,0 +1,41 @@
+﻿@page "/create"
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Diagnostics
+
+@attribute [Authorize]
+
+<PageTitle>Create a new table</PageTitle>
+
+<AuthorizeView>
+    <Authorized>
+        <form method="post" @onsubmit="Submit" @formname="starship-plain-form">
+            <AntiforgeryToken />
+            <div>
+                <label>
+                    Identifier:
+                    <InputText @bind-Value="intaugur" />
+                </label>
+            </div>
+            <div>
+                <button type="submit">Submit</button>
+            </div>
+        </form>
+    </Authorized>
+    <NotAuthorized>
+        You are not authorized to view this content. Please log in.
+    </NotAuthorized>
+</AuthorizeView>
+
+
+
+@code {
+    [SupplyParameterFromForm]
+    private string intaugur { get; set; }
+
+    protected override void OnInitialized() => intaugur = "1";
+
+    private void Submit() => Debug.WriteLine("Id = " + intaugur);
+
+}
+
