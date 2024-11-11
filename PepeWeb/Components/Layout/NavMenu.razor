@@ -1,10 +1,15 @@
 ﻿@implements IDisposable
 
+@using Microsoft.AspNetCore.Identity
+@using PepeWeb.Data
+
 @inject NavigationManager NavigationManager
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <img src="images/pepefrog.png" alt="pepe img" width="32" height="32" />
+        <p>🐸</p>
         <a class="navbar-brand" href="">Pepe Web</a>
     </div>
 </div>
@@ -19,17 +24,27 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="table">
-                <span class="bi bi-lock-nav-menu" aria-hidden="true"></span> Your Table
-            </NavLink>
-        </div>
-
         <AuthorizeView>
             <Authorized>
+
+                @foreach (int table in tableAmount)
+                {
+                    var tableUrl = $"table/{table}";
+
+                    <div class="nav-item px-3">
+                        <NavLink class="nav-link" href="@tableUrl">
+                            <span class="bi bi-file-earmark-richtext-nav-menu" aria-hidden="true"></span> Your Table @table
+                        </NavLink>
+                    </div>
+                }
+
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
-                        <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> 
+                            @if (user != null)
+                            {
+                                @user.Nickname
+                            }
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
@@ -44,13 +59,13 @@
             </Authorized>
             <NotAuthorized>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Register">
-                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
+                    <NavLink class="nav-link" href="Account/Login">
+                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="Account/Login">
-                        <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
+                    <NavLink class="nav-link" href="Account/Register">
+                        <span class="bi bi-person-nav-menu" aria-hidden="true"></span> Register
                     </NavLink>
                 </div>
             </NotAuthorized>
@@ -59,12 +74,26 @@
 </div>
 
 @code {
+    private ApplicationUser user;
     private string? currentUrl;
 
-    protected override void OnInitialized()
+    // TODO pull this out of the server.
+    private List<int> tableAmount = new List<int> { 1, 2, 3 };
+
+
+    protected override async Task OnInitializedAsync()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var claimsPrincipal = authState.User;
+
+        if (claimsPrincipal.Identity?.IsAuthenticated == true)
+        {
+            // Retrieve the ApplicationUser using UserManager
+            user = await UserManager.GetUserAsync(claimsPrincipal);
+        }
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)

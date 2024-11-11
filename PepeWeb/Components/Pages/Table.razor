@@ -1,4 +1,4 @@
-﻿@page "/table"
+﻿@page "/table/{id:int}"
 
 @using Microsoft.AspNetCore.Authorization
 @using PepeWeb.Data.DTO;
@@ -25,7 +25,7 @@
             }
             else
             {
-                <li>No tables available.</li>
+                <li>No tables available. @Id</li>
             }
         </ul>
 
@@ -37,6 +37,9 @@
 
 @code {
     private List<string>? forecasts = new List<string>();
+
+    [Parameter]
+    public int Id { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
