@@ -1,26 +1,72 @@
 ﻿@page "/create"
 
+@rendermode InteractiveServer
+
 @using Microsoft.AspNetCore.Authorization
 @using System.Diagnostics
+@using PepeWeb.Data.Models
+@using PepeWeb.Data.Enums
+@using PepeWeb.Data.VirtualModels
+@using System.Security.Claims
+
+@inject PepeWeb.Services.TableCreationService tableCreationService
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 @attribute [Authorize]
 
 <PageTitle>Create a new table</PageTitle>
 
+<h1>Create a table</h1>
+
 <AuthorizeView>
     <Authorized>
-        <form method="post" @onsubmit="Submit" @formname="starship-plain-form">
-            <AntiforgeryToken />
-            <div>
-                <label>
-                    Identifier:
-                    <InputText @bind-Value="intaugur" />
-                </label>
+        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="NewTable">
+
+            <div class="row">
+                <div class="col-md-6">
+
+                    <label class="form-label">
+                        Table name:
+                        <InputText class="form-control" placeholder="Table name" @bind-Value="_tableName" />
+                        <ValidationMessage For="() => _tableName" class="text-danger" />
+                    </label>
+                    <br />
+                    <hr />
+                    @foreach (var item in _fieldList)
+                    {
+                        <div>
+                            <div >
+                                <label class="form-label">
+                                    Field @item.Id:
+                                    <InputText class="form-control" placeholder="Field name" @bind-Value="item.Name" />
+                                    <ValidationMessage For="() => item.Name" class="text-danger" />
+                                </label>
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @item.Type.ToString()
+                                </button>
+                                <ul class="dropdown-menu">
+                                    @foreach (var fieldType in Enum.GetValues(typeof(CustomFieldType)).Cast<CustomFieldType>())
+                                    {
+                                        <li>
+                                            <button class="dropdown-item" type="button" @onclick="() => item.Type = fieldType">
+                                                @fieldType
+                                            </button>
+                                            <ValidationMessage For="() => item.Type" class="text-danger" />
+                                        </li>
+                                    }
+                                </ul>
+                                <button class="btn btn-danger" type="button" @onclick="() => RemoveItem(item)">X</button>
+                            </div>
+                        </div>
+                    }
+                    <br />
+                    <button class="btn btn-outline-primary" type="button" @onclick="AddItem"> + Add Field</button>
+                    <br />
+                    <hr />
+                    <button class="btn btn-success" type="submit">Submit</button>
+                </div>
             </div>
-            <div>
-                <button type="submit">Submit</button>
-            </div>
-        </form>
+        </EditForm>
     </Authorized>
     <NotAuthorized>
         You are not authorized to view this content. Please log in.
@@ -30,12 +76,65 @@
 
 
 @code {
-    [SupplyParameterFromForm]
-    private string intaugur { get; set; }
+    private string _tableName;
+    private string? userId;
 
-    protected override void OnInitialized() => intaugur = "1";
+    private List<Field> _fieldList = new List<Field>();
 
-    private void Submit() => Debug.WriteLine("Id = " + intaugur);
+    protected override async Task OnInitializedAsync()
+    {
+        _fieldList.Add(new Field { Id = 1});
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity?.IsAuthenticated == true)
+        {
+            userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        }
+    }
+
+    private async Task Submit()
+    {
+        Debug.WriteLine("Etered submit function");
+        // Have to discard IDs.
+        List<Field> newFields = new();
+        foreach (var field in _fieldList)
+        {
+            newFields.Add(new Field { Name = field .Name, Type = field.Type});
+        }
+
+        IntermediateNewTableData newTableData = new IntermediateNewTableData
+            {
+                TableName = _tableName,
+                Fields = newFields,
+                UserId = userId
+
+            };
+
+        await tableCreationService.CreateTable(newTableData);
+
+    }
+
+    private void AddItem()
+    {
+        if (_fieldList.Count > 0)
+        {
+            _fieldList.Add(new Field { Id = _fieldList.Last().Id + 1 });
+        }
+        else
+        {
+            _fieldList.Add(new Field { Id = 1 });
+        }
+
+
+    }
+
+    private void RemoveItem(Field item)
+    {
+        _fieldList.Remove(item);
+
+    }
+
 
 }
 

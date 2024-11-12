@@ -1,10 +1,11 @@
-﻿using Microsoft.VisualBasic.FileIO;
-using PepeWeb.Data.Enums;
+﻿using PepeWeb.Data.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace PepeWeb.Data.Models
 {
     public class Field
     {
+        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
         public int TableId { get; set; }

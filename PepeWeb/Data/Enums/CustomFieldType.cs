@@ -2,6 +2,9 @@
 {
     public enum CustomFieldType
     {
-        None = 0,
+        Text,
+        Number,
+        Link,
+
     }
 }

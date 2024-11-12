@@ -2,10 +2,13 @@
 
 @using Microsoft.AspNetCore.Identity
 @using PepeWeb.Data
+@using PepeWeb.Data.DTO
+@using PepeWeb.Services
 
 @inject NavigationManager NavigationManager
 @inject UserManager<ApplicationUser> UserManager
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject TableService tableService
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -27,13 +30,13 @@
         <AuthorizeView>
             <Authorized>
 
-                @foreach (int table in tableAmount)
+                @foreach (TableDTO table in _userTables)
                 {
-                    var tableUrl = $"table/{table}";
+                    var tableUrl = $"table/{table.Id}";
 
                     <div class="nav-item px-3">
                         <NavLink class="nav-link" href="@tableUrl">
-                            <span class="bi bi-file-earmark-richtext-nav-menu" aria-hidden="true"></span> Your Table @table
+                            <span class="bi bi-file-earmark-richtext-nav-menu" aria-hidden="true"></span> @table.Name
                         </NavLink>
                     </div>
                 }
@@ -77,9 +80,7 @@
     private ApplicationUser user;
     private string? currentUrl;
 
-    // TODO pull this out of the server.
-    private List<int> tableAmount = new List<int> { 1, 2, 3 };
-
+    private List<TableDTO> _userTables = new List<TableDTO>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -94,6 +95,9 @@
             // Retrieve the ApplicationUser using UserManager
             user = await UserManager.GetUserAsync(claimsPrincipal);
         }
+
+        _userTables = await tableService.GetUserTables();
+
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
