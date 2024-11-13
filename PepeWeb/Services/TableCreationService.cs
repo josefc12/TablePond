@@ -7,6 +7,7 @@ using PepeWeb.Data.Models;
 using PepeWeb.Data.Enums;
 using PepeWeb.Data.VirtualModels;
 using System.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 
 namespace PepeWeb.Services
 {
@@ -21,7 +22,7 @@ namespace PepeWeb.Services
             _mapper = mapper;
         }
 
-        public async Task<string> CreateTable(IntermediateNewTableData newTableData)
+        public async Task CreateTable(IntermediateNewTableData newTableData)
         {
 
             Debug.WriteLine("Etered CreateTable function");
@@ -34,21 +35,22 @@ namespace PepeWeb.Services
                 {
                     Name = newTableData.TableName,
                     UserId = newTableData.UserId,
+                    ItemAmount = 0
                 };
 
-                await _context.Tables.AddAsync(newTable);
+                _context.Tables.Add(newTable);
                 await _context.SaveChangesAsync();
 
                 foreach (Field field in newTableData.Fields)
                 {
-                    field.TableId = newTable.Id;
+                    field.Table = newTable;
                     if (field.Type == null)
                     {
                         field.Type = CustomFieldType.Text;
                     }
                 }
 
-                await _context.Fields.AddRangeAsync(newTableData.Fields);
+                _context.Fields.AddRange(newTableData.Fields);
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
@@ -58,7 +60,20 @@ namespace PepeWeb.Services
             
             // TODO return a message saying that creating table was sucessfull.
             // TODO make sure the user can't spam the submit button.
-            return "Done";
+            return;
         }
+
+        public async Task<bool> TableExists(string tableName)
+        {
+
+            if (await _context.Tables.Where(t => t.Name == tableName).FirstOrDefaultAsync() == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
+            
+
     }
 }

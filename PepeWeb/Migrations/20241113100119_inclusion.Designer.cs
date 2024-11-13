@@ -12,8 +12,8 @@ using PepeWeb.Data;
 namespace PepeWeb.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241112133227_newKyes")]
-    partial class newKyes
+    [Migration("20241113100119_inclusion")]
+    partial class inclusion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -241,6 +241,8 @@ namespace PepeWeb.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TableId");
+
                     b.ToTable("Fields");
                 });
 
@@ -251,6 +253,9 @@ namespace PepeWeb.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemAmount")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -287,6 +292,10 @@ namespace PepeWeb.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FieldId");
+
+                    b.HasIndex("TableId");
 
                     b.ToTable("Values");
                 });
@@ -340,6 +349,36 @@ namespace PepeWeb.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PepeWeb.Data.Models.Field", b =>
+                {
+                    b.HasOne("PepeWeb.Data.Models.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Table");
+                });
+
+            modelBuilder.Entity("PepeWeb.Data.Models.Value", b =>
+                {
+                    b.HasOne("PepeWeb.Data.Models.Field", "Field")
+                        .WithMany()
+                        .HasForeignKey("FieldId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PepeWeb.Data.Models.Table", "Table")
+                        .WithMany()
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Field");
+
+                    b.Navigation("Table");
                 });
 #pragma warning restore 612, 618
         }

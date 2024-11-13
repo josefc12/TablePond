@@ -1,33 +1,41 @@
-﻿@page "/table/{id:int}"
+﻿@page "/table/{tableId:int}"
 
 @using Microsoft.AspNetCore.Authorization
 @using PepeWeb.Data.DTO;
+@using PepeWeb.Data.VirtualModels;
+@using System.Diagnostics
 
-@inject PepeWeb.Services.WeatherService weatherService
+@inject PepeWeb.Services.TableService tableService
 
 @attribute [StreamRendering]
 @attribute [Authorize]
 
 <PageTitle>Auth</PageTitle>
 
-<h1>Table name</h1>
-
 <AuthorizeView>
     <Authorized>
-        
-        <ul>
-            @if (forecasts != null && forecasts.Any())
-            {
-                foreach (var name in forecasts)
+       
+        <h1>@_table.Name</h1>
+        <button class="btn btn-success" type="button" @onclick="AddRecord">+ Add record</button>
+        <button class="btn btn-outline-warning" type="button" @onclick="EditTable">Edit table</button>
+
+        <table class="table">
+            <tr>
+                @foreach (FieldDTO col in _table.Columns)
                 {
-                    <li>@name</li>
+                    <th>@col.Name</th>
                 }
-            }
-            else
+            </tr>
+            @foreach (TableRow row in _table.Rows)
             {
-                <li>No tables available. @Id</li>
+                <tr>
+                    @foreach (string val in row.Values)
+                    {
+                        <td>@val</td>
+                    }
+                </tr>
             }
-        </ul>
+        </table>
 
     </Authorized>
     <NotAuthorized>
@@ -36,19 +44,40 @@
 </AuthorizeView>
 
 @code {
-    private List<string>? forecasts = new List<string>();
 
     [Parameter]
-    public int Id { get; set; }
+    public int tableId { get; set; }
+
+    
+
+    private TableConstructDTO _table = new TableConstructDTO()
+    {
+        Columns = new List<FieldDTO>(),
+        Rows = new List<TableRow>() { new TableRow() { Values = new List<string>() } },
+
+    };
+
 
     protected override async Task OnInitializedAsync()
     {
+        // Get user's table
+        TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
+        _table = userTable;
+        
+        //
 
-        var forecastsRaw = await weatherService.Get();
-        foreach (TableDTO fore in forecastsRaw)
-        {
-            forecasts.Add(fore.Name);
-        }
+    }
+
+    private void AddRecord()
+    {
+       
+
+    }
+
+    private void EditTable()
+    {
+
+
     }
 
 }

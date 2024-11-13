@@ -7,8 +7,8 @@ namespace PepeWeb.Data.Models
         [Key]
         public int Id { get; set; }
         public string Val { get; set; }
-        public int TableId { get; set; }
-        public int FieldId { get; set; }
+        public Table Table { get; set; }
+        public Field Field { get; set; }
         public int ItemId { get; set; }
 
     }

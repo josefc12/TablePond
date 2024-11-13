@@ -21,7 +21,6 @@
 <AuthorizeView>
     <Authorized>
         <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="NewTable">
-
             <div class="row">
                 <div class="col-md-6">
 
@@ -64,6 +63,20 @@
                     <br />
                     <hr />
                     <button class="btn btn-success" type="submit">Submit</button>
+
+                    @if (!string.IsNullOrEmpty(StatusMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @StatusMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @ErrorMessage
+                        </div>
+                    }
+
                 </div>
             </div>
         </EditForm>
@@ -78,6 +91,8 @@
 @code {
     private string _tableName;
     private string? userId;
+    private string? StatusMessage;
+    private string? ErrorMessage;
 
     private List<Field> _fieldList = new List<Field>();
 
@@ -95,7 +110,16 @@
 
     private async Task Submit()
     {
-        Debug.WriteLine("Etered submit function");
+
+        ErrorMessage = null;
+        StatusMessage = null;
+
+        if (await tableCreationService.TableExists(_tableName))
+        {
+            ErrorMessage = "Table with this name already exists!";
+            return;
+        }
+
         // Have to discard IDs.
         List<Field> newFields = new();
         foreach (var field in _fieldList)
@@ -111,7 +135,17 @@
 
             };
 
-        await tableCreationService.CreateTable(newTableData);
+        try
+        {
+            await tableCreationService.CreateTable(newTableData);
+            StatusMessage = "Table created successfully!";
+        }
+        catch (Exception ex)
+        {
+            // Log error if needed
+            Debug.WriteLine($"Error creating table: {ex.Message}");
+            ErrorMessage = "An error occurred while creating the table. Please try again.";
+        }
 
     }
 
