@@ -23,20 +23,18 @@ namespace PepeWeb.Services
             _mapper = mapper;
         }
 
-        public async Task CreateTable(IntermediateNewTableData newTableData)
+        public async Task<TableDTO> CreateTable(IntermediateNewTableData newTableData)
         {
 
             if (newTableData == null) throw new ArgumentNullException(nameof(newTableData));
-
+            Table newTable = new Table
+            {
+                Name = newTableData.TableName,
+                UserId = newTableData.UserId,
+                ItemAmount = 0
+            };
             try
             {
-                Table newTable = new Table
-                {
-                    Name = newTableData.TableName,
-                    UserId = newTableData.UserId,
-                    ItemAmount = 0
-                };
-
                 _context.Tables.Add(newTable);
                 await _context.SaveChangesAsync();
 
@@ -58,7 +56,7 @@ namespace PepeWeb.Services
                 throw new Exception(e.Message);
             }
             
-            return;
+            return _mapper.Map<TableDTO>(newTable);
         }
 
         public async Task EditTable(TableConstructDTO newTableData)

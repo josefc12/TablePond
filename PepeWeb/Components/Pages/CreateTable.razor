@@ -12,6 +12,7 @@
 
 @inject PepeWeb.Services.TableCreationService tableCreationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager navigationManager
 
 @attribute [Authorize]
 
@@ -95,6 +96,8 @@
     private string? StatusMessage;
     private string? ErrorMessage;
 
+    private TableDTO? _newTable = null;
+    
     private List<FieldDTO> _fieldList = new List<FieldDTO>();
 
     protected override async Task OnInitializedAsync()
@@ -131,7 +134,7 @@
 
         try
         {
-            await tableCreationService.CreateTable(newTableData);
+            _newTable = await tableCreationService.CreateTable(newTableData);
             StatusMessage = "Table created successfully!";
         }
         catch (Exception ex)
@@ -141,6 +144,12 @@
             ErrorMessage = "An error occurred while creating the table. Please try again.";
         }
 
+        if (_newTable != null)
+        {
+            navigationManager.NavigateTo($"/table/{_newTable.Id}", true);
+        }
+
+        
     }
 
     private void AddItem()
