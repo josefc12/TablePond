@@ -5,7 +5,10 @@
 @using PepeWeb.Data.VirtualModels;
 @using System.Diagnostics
 
+@rendermode InteractiveServer
+
 @inject PepeWeb.Services.TableService tableService
+@inject NavigationManager navigationManager
 
 @attribute [StreamRendering]
 @attribute [Authorize]
@@ -48,7 +51,7 @@
     [Parameter]
     public int tableId { get; set; }
 
-    
+
 
     private TableConstructDTO _table = new TableConstructDTO()
     {
@@ -56,27 +59,31 @@
         Rows = new List<TableRow>() { new TableRow() { Values = new List<string>() } },
 
     };
-
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
         // Get user's table
         TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
         _table = userTable;
-        
         //
 
     }
 
     private void AddRecord()
     {
-       
+
 
     }
 
     private void EditTable()
     {
-
+        try
+        {
+            navigationManager.NavigateTo($"/edit/{tableId}");
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
 
     }
 

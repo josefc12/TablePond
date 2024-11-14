@@ -1,4 +1,5 @@
 ﻿using PepeWeb.Data.Enums;
+using PepeWeb.Data.Models;
 
 namespace PepeWeb.Data.DTO
 {

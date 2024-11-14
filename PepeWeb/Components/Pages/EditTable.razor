@@ -1,4 +1,4 @@
-﻿@page "/create"
+﻿@page "/edit/{tableId:int}"
 
 @rendermode InteractiveServer
 
@@ -7,21 +7,24 @@
 @using PepeWeb.Data.Models
 @using PepeWeb.Data.Enums
 @using PepeWeb.Data.VirtualModels
-@using PepeWeb.Data.DTO;
 @using System.Security.Claims
+@using PepeWeb.Data.DTO;
+@using PepeWeb.Data.VirtualModels;
 
 @inject PepeWeb.Services.TableCreationService tableCreationService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject PepeWeb.Services.TableService tableService
+@inject NavigationManager navigationManager
 
 @attribute [Authorize]
 
-<PageTitle>Create a new table</PageTitle>
+<PageTitle>Edit table</PageTitle>
 
-<h1>Create a table</h1>
+<h1>Edit table</h1>
 
 <AuthorizeView>
     <Authorized>
-        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="NewTable">
+        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="EditTable">
             <div class="row">
                 <div class="col-md-6">
 
@@ -35,9 +38,9 @@
                     @foreach (var item in _fieldList)
                     {
                         <div>
-                            <div >
+                            <div>
                                 <label class="form-label">
-                                    Field:
+                                    Field @item.Id:
                                     <InputText class="form-control" placeholder="Field name" @bind-Value="item.Name" />
                                     <ValidationMessage For="() => item.Name" class="text-danger" />
                                 </label>
@@ -63,7 +66,7 @@
                     <button class="btn btn-outline-primary" type="button" @onclick="AddItem"> + Add Field</button>
                     <br />
                     <hr />
-                    <button class="btn btn-success" type="submit">Submit</button>
+                    <button class="btn btn-success" type="submit">Submit and return</button>
 
                     @if (!string.IsNullOrEmpty(StatusMessage))
                     {
@@ -90,7 +93,20 @@
 
 
 @code {
+
+    [Parameter]
+    public int tableId { get; set; }
+
+    private TableConstructDTO _table = new TableConstructDTO()
+        {
+            Columns = new List<FieldDTO>(),
+            Rows = new List<TableRow>() { new TableRow() { Values = new List<string>() } },
+
+        };
+
     private string _tableName;
+    private string _tableNameInitial;
+    private TableDTO _relatedTableObject;
     private string? userId;
     private string? StatusMessage;
     private string? ErrorMessage;
@@ -99,14 +115,23 @@
 
     protected override async Task OnInitializedAsync()
     {
-        _fieldList.Add(new FieldDTO { });
-
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         if (user.Identity?.IsAuthenticated == true)
         {
             userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
+
+        TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
+        _table = userTable;
+
+        _tableName = _table.Name;
+        _tableNameInitial = _table.Name;
+
+        _relatedTableObject = await tableService.GetTable(tableId);
+
+        _fieldList = _table.Columns;
+
     }
 
     private async Task Submit()
@@ -115,39 +140,34 @@
         ErrorMessage = null;
         StatusMessage = null;
 
-        if (await tableCreationService.TableExists(_tableName))
+        if (_tableNameInitial != _tableName && await tableCreationService.TableExists(_tableName))
         {
             ErrorMessage = "Table with this name already exists!";
             return;
         }
 
-        IntermediateNewTableData newTableData = new IntermediateNewTableData
-            {
-                TableName = _tableName,
-                Fields = _fieldList,
-                UserId = userId
+        _table.Name = _tableName;
+        _table.Columns = _fieldList;
 
-            };
 
         try
         {
-            await tableCreationService.CreateTable(newTableData);
-            StatusMessage = "Table created successfully!";
+            await tableCreationService.EditTable(_table);
         }
         catch (Exception ex)
         {
             // Log error if needed
             Debug.WriteLine($"Error creating table: {ex.Message}");
-            ErrorMessage = "An error occurred while creating the table. Please try again.";
+            ErrorMessage = "An error occurred while editing the table. Please try again.";
         }
+
+        navigationManager.NavigateTo($"/table/{tableId}", true);
 
     }
 
     private void AddItem()
     {
-
-      _fieldList.Add(new FieldDTO {});
-
+        _fieldList.Add(new FieldDTO { Table = _relatedTableObject });
     }
 
     private void RemoveItem(FieldDTO item)

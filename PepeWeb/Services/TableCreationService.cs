@@ -8,6 +8,7 @@ using PepeWeb.Data.Enums;
 using PepeWeb.Data.VirtualModels;
 using System.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.HttpLogging;
 
 namespace PepeWeb.Services
 {
@@ -25,8 +26,6 @@ namespace PepeWeb.Services
         public async Task CreateTable(IntermediateNewTableData newTableData)
         {
 
-            Debug.WriteLine("Etered CreateTable function");
-
             if (newTableData == null) throw new ArgumentNullException(nameof(newTableData));
 
             try
@@ -41,7 +40,8 @@ namespace PepeWeb.Services
                 _context.Tables.Add(newTable);
                 await _context.SaveChangesAsync();
 
-                foreach (Field field in newTableData.Fields)
+                var fields = _mapper.Map<List<Field>>(newTableData.Fields);
+                foreach (Field field in fields)
                 {
                     field.Table = newTable;
                     if (field.Type == null)
@@ -50,7 +50,7 @@ namespace PepeWeb.Services
                     }
                 }
 
-                _context.Fields.AddRange(newTableData.Fields);
+                _context.Fields.AddRange(fields);
                 await _context.SaveChangesAsync();
             }
             catch (Exception e)
@@ -58,8 +58,64 @@ namespace PepeWeb.Services
                 throw new Exception(e.Message);
             }
             
-            // TODO return a message saying that creating table was sucessfull.
-            // TODO make sure the user can't spam the submit button.
+            return;
+        }
+
+        public async Task EditTable(TableConstructDTO newTableData)
+        {
+
+            if (newTableData == null) throw new ArgumentNullException(nameof(newTableData));
+
+            try
+            {
+                //Find the table by id and change its name,if it changed
+                var liveTable = _context.Tables.Where(t => t.Id == newTableData.Id).FirstOrDefault();
+
+                if ( liveTable != null && newTableData.Name != liveTable.Name )
+                {
+                    liveTable.Name = newTableData.Name;
+                }
+
+                var fields = _mapper.Map<List<Field>>(newTableData.Columns);
+
+
+                foreach (Field field in fields)
+                {
+                    field.Table = liveTable;
+                    var liveField = _context.Fields.Where(f => f.Table == liveTable && f.Id == field.Id).FirstOrDefault();
+
+                    if (liveField != null)
+                    {
+                        //OPTIMIZE Field already exists. Something has changed? Don't matter just overwrite it.
+                        _context.Entry(liveField).CurrentValues.SetValues(field);
+                    }
+                    else
+                    {
+                        _context.Fields.Add(field);
+                    }
+
+                }
+
+                //Check if any field had been deleted
+                var newFieldIds = newTableData.Columns.Select(c => c.Id).ToHashSet();
+                var existingFields = await _context.Fields.Where(f => f.Table == liveTable).ToListAsync();
+                foreach (Field existingField in existingFields)
+                {
+
+                    if (!newFieldIds.Contains(existingField.Id))
+                    {
+                        _context.Fields.Remove(existingField);
+                    }
+
+                }
+
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+
             return;
         }
 
@@ -72,8 +128,6 @@ namespace PepeWeb.Services
             }
             return true;
         }
-
-            
 
     }
 }

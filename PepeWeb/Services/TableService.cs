@@ -97,5 +97,10 @@ namespace PepeWeb.Services
             return constructedUserTable;
 
         }
+
+        public async Task<TableDTO> GetTable(int tableId)
+        {
+            return _mapper.Map<TableDTO>(await _context.Tables.Where(t => t.Id == tableId).FirstOrDefaultAsync());
+        }
     }
 }
