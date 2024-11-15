@@ -13,17 +13,19 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject TableService tableService
 
+@* Title *@
 <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <p>🐸</p>
-        <a class="navbar-brand" href="">Pepe Web</a>
-    </div>
+    <a class="navbar-brand" href="">Pepe Web</a>
 </div>
 
+@* Button for toggling the left-side menu on phones *@
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
+@* Left-side menu *@
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
+
+        @* Home link *@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
@@ -32,9 +34,11 @@
 
         <AuthorizeView>
             <Authorized>
-                
+
+                @* Dynamically create menu entries to user's tables *@
                 @foreach (TableDTO table in _userTables)
                 {
+                    @*The string must be pre-defined using C#*@
                     var tableUrl = $"table/{table.Id}";
 
                     <div class="nav-item px-3">
@@ -44,6 +48,7 @@
                     </div>
                 }
 
+                @* Link to account management *@
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Manage">
                         <span class="bi bi-person-nav-menu" aria-hidden="true"></span> 
@@ -54,6 +59,7 @@
                     </NavLink>
                 </div>
 
+                @* Logout action *@
                 <div class="nav-item px-3">
                     <form action="Account/Logout" method="post">
                         <AntiforgeryToken />
@@ -65,25 +71,31 @@
                 </div>
 
             </Authorized>
+
             <NotAuthorized>
+
+                @* Login action *@
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="Account/Login">
                         <span class="bi bi-person-badge-nav-menu" aria-hidden="true"></span> Login
                     </NavLink>
                 </div>
+
             </NotAuthorized>
+
         </AuthorizeView>
     </nav>
 </div>
 
 @code {
-    private ApplicationUser user;
-    private string? currentUrl;
 
+    private ApplicationUser? user;
+    private string? currentUrl;
     private List<TableDTO> _userTables = new List<TableDTO>();
 
     protected override async Task OnInitializedAsync()
     {
+
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         NavigationManager.LocationChanged += OnLocationChanged;
 
@@ -96,6 +108,7 @@
             user = await UserManager.GetUserAsync(claimsPrincipal);
         }
 
+        // Get user tables
         _userTables = await tableService.GetUserTables();
 
     }
@@ -108,7 +121,6 @@
 
     public void Dispose()
     {
-
         NavigationManager.LocationChanged -= OnLocationChanged;
     }
 }

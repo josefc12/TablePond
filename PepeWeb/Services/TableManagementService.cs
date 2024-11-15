@@ -1,23 +1,19 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using PepeWeb.Data;
 using PepeWeb.Data.DTO;
 using PepeWeb.Data.Models;
-using PepeWeb.Data.Enums;
 using PepeWeb.Data.VirtualModels;
-using System.Diagnostics;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.AspNetCore.HttpLogging;
 
 namespace PepeWeb.Services
 {
-    public class TableCreationService
+    public class TableManagementService
     {
+
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
 
-        public TableCreationService(ApplicationDbContext context, IMapper mapper)
+        public TableManagementService(ApplicationDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -27,25 +23,28 @@ namespace PepeWeb.Services
         {
 
             if (newTableData == null) throw new ArgumentNullException(nameof(newTableData));
+
+            // Init new table object
             Table newTable = new Table
             {
                 Name = newTableData.TableName,
                 UserId = newTableData.UserId,
                 ItemAmount = 0
             };
+
             try
             {
+                // Make sure the table is added before anything else
                 _context.Tables.Add(newTable);
                 await _context.SaveChangesAsync();
 
+                // Get the fields
                 var fields = _mapper.Map<List<Field>>(newTableData.Fields);
+
+                // Assign the table to each field
                 foreach (Field field in fields)
                 {
                     field.Table = newTable;
-                    if (field.Type == null)
-                    {
-                        field.Type = CustomFieldType.Text;
-                    }
                 }
 
                 _context.Fields.AddRange(fields);
@@ -76,27 +75,30 @@ namespace PepeWeb.Services
 
                 var fields = _mapper.Map<List<Field>>(newTableData.Columns);
 
-
-                foreach (Field field in fields)
+                if (liveTable != null)
                 {
-                    field.Table = liveTable;
-                    var liveField = _context.Fields.Where(f => f.Table == liveTable && f.Id == field.Id).FirstOrDefault();
-
-                    if (liveField != null)
+                    foreach (Field field in fields)
                     {
-                        //OPTIMIZE Field already exists. Something has changed? Don't matter just overwrite it.
-                        _context.Entry(liveField).CurrentValues.SetValues(field);
-                    }
-                    else
-                    {
-                        _context.Fields.Add(field);
-                    }
+                        field.Table = liveTable;
+                        var liveField = _context.Fields.Where(f => f.Table == liveTable && f.Id == field.Id).FirstOrDefault();
 
+                        if (liveField != null)
+                        {
+                            //Field already exists. Something has changed? Don't matter just overwrite it.
+                            _context.Entry(liveField).CurrentValues.SetValues(field);
+                        }
+                        else
+                        {
+                            _context.Fields.Add(field);
+                        }
+
+                    }
                 }
 
                 //Check if any field had been deleted
                 var newFieldIds = newTableData.Columns.Select(c => c.Id).ToHashSet();
                 var existingFields = await _context.Fields.Where(f => f.Table == liveTable).ToListAsync();
+
                 foreach (Field existingField in existingFields)
                 {
 
@@ -108,6 +110,7 @@ namespace PepeWeb.Services
                 }
 
                 await _context.SaveChangesAsync();
+
             }
             catch (Exception e)
             {

@@ -5,11 +5,11 @@ namespace PepeWeb.Data
     // Add profile data for application users by adding properties to the ApplicationUser class
     public class ApplicationUser : IdentityUser
     {
+        // Make a nickname from user email.
         public string Nickname
         {
             get
             {
-                // Get the part before the '@' symbol in the email
                 if (UserName != null)
                 {
                     var atIndex = UserName.IndexOf('@');

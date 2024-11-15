@@ -10,7 +10,7 @@
 @using PepeWeb.Data.DTO;
 @using System.Security.Claims
 
-@inject PepeWeb.Services.TableCreationService tableCreationService
+@inject PepeWeb.Services.TableManagementService tableManagementService
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager navigationManager
 
@@ -22,50 +22,67 @@
 
 <AuthorizeView>
     <Authorized>
+
         <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="NewTable">
             <div class="row">
                 <div class="col-md-6">
 
+                    @* Table name input *@
                     <label class="form-label">
                         Table name:
                         <InputText class="form-control" placeholder="Table name" @bind-Value="_tableName" />
                         <ValidationMessage For="() => _tableName" class="text-danger" />
                     </label>
+
                     <br />
                     <hr />
+
+                    @* Add UI for each field the table is supposed to have *@
                     @foreach (var item in _fieldList)
                     {
                         <div>
-                            <div >
-                                <label class="form-label">
-                                    Field:
-                                    <InputText class="form-control" placeholder="Field name" @bind-Value="item.Name" />
-                                    <ValidationMessage For="() => item.Name" class="text-danger" />
-                                </label>
-                                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    @item.Type.ToString()
-                                </button>
-                                <ul class="dropdown-menu">
-                                    @foreach (var fieldType in Enum.GetValues(typeof(CustomFieldType)).Cast<CustomFieldType>())
-                                    {
-                                        <li>
-                                            <button class="dropdown-item" type="button" @onclick="() => item.Type = fieldType">
-                                                @fieldType
-                                            </button>
-                                            <ValidationMessage For="() => item.Type" class="text-danger" />
-                                        </li>
-                                    }
-                                </ul>
-                                <button class="btn btn-danger" type="button" @onclick="() => RemoveItem(item)">X</button>
-                            </div>
+                            @* Input for field name/title *@
+                            <label class="form-label">
+                                Field:
+                                <InputText class="form-control" placeholder="Field name" @bind-Value="item.Name" />
+                                <ValidationMessage For="() => item.Name" class="text-danger" />
+                            </label>
+
+                            @* Dropdown input for field type *@
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                @item.Type.ToString()
+                            </button>
+
+                            @* Dropdown menu itself *@
+                            <ul class="dropdown-menu">
+                                @foreach (var fieldType in Enum.GetValues(typeof(CustomFieldType)).Cast<CustomFieldType>())
+                                {
+                                    <li>
+                                        <button class="dropdown-item" type="button" @onclick="() => item.Type = fieldType">
+                                            @fieldType
+                                        </button>
+                                        <ValidationMessage For="() => item.Type" class="text-danger" />
+                                    </li>
+                                }
+                            </ul>
+
+                            @* Button that deletes this field *@
+                            <button class="btn btn-danger" type="button" @onclick="() => RemoveItem(item)">X</button>
                         </div>
                     }
+
                     <br />
+
+                    @* Button for adding more fields *@
                     <button class="btn btn-outline-primary" type="button" @onclick="AddItem"> + Add Field</button>
+
                     <br />
                     <hr />
-                    <button class="btn btn-success" type="submit">Submit</button>
 
+                    @* Button that makes the table *@
+                    <button class="btn btn-success" type="submit">Create</button>
+
+                    @* Display status messages, if there is a status message *@
                     @if (!string.IsNullOrEmpty(StatusMessage))
                     {
                         <div class="alert alert-success mt-3">
@@ -82,87 +99,95 @@
                 </div>
             </div>
         </EditForm>
+
     </Authorized>
     <NotAuthorized>
         You are not authorized to view this content. Please log in.
     </NotAuthorized>
 </AuthorizeView>
 
-
-
 @code {
-    private string _tableName;
-    private string? userId;
+
+    private string? _tableName;
+    private string? _userId;
     private string? StatusMessage;
     private string? ErrorMessage;
-
     private TableDTO? _newTable = null;
-    
     private List<FieldDTO> _fieldList = new List<FieldDTO>();
 
     protected override async Task OnInitializedAsync()
     {
+        // Add at least one filed, initially
         _fieldList.Add(new FieldDTO { });
 
+        // Get authenticated user's ID
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
         if (user.Identity?.IsAuthenticated == true)
         {
-            userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            _userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 
     private async Task Submit()
     {
-
+        // Clear messages
         ErrorMessage = null;
         StatusMessage = null;
 
-        if (await tableCreationService.TableExists(_tableName))
+        // Prevent the creation of a table with a name that already exists
+        if (_tableName != null && _userId != null && await tableManagementService.TableExists(_tableName) == false)
         {
-            ErrorMessage = "Table with this name already exists!";
-            return;
-        }
+            // Init an object that's going fuse and carry the data of the table and fields
+            IntermediateNewTableData newTableData = new IntermediateNewTableData
+                {
+                    TableName = _tableName,
+                    Fields = _fieldList,
+                    UserId = _userId
+                };
 
-        IntermediateNewTableData newTableData = new IntermediateNewTableData
+            // Call a service that's going to process the data and write into the database
+            try
             {
-                TableName = _tableName,
-                Fields = _fieldList,
-                UserId = userId
-
-            };
-
-        try
-        {
-            _newTable = await tableCreationService.CreateTable(newTableData);
-            StatusMessage = "Table created successfully!";
+                // When the table is created, it's actually returned as well
+                _newTable = await tableManagementService.CreateTable(newTableData);
+                StatusMessage = "Table created successfully!";
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error creating table: {ex.Message}");
+                ErrorMessage = "An error occurred while creating the table. Please try again.";
+            }
         }
-        catch (Exception ex)
+        else if (_tableName != null && await tableManagementService.TableExists(_tableName))
         {
-            // Log error if needed
-            Debug.WriteLine($"Error creating table: {ex.Message}");
-            ErrorMessage = "An error occurred while creating the table. Please try again.";
+            ErrorMessage = "A table with the same name already exists.";
+        }
+        else
+        {
+            ErrorMessage = "Error. User or table missing.";
         }
 
+        // If the table was actually created and exists yet, navigate to it
         if (_newTable != null)
         {
             navigationManager.NavigateTo($"/table/{_newTable.Id}", true);
         }
+        else
+        {
+            ErrorMessage = "Error. Created table not found.";
+        }
 
-        
     }
 
     private void AddItem()
     {
-
-      _fieldList.Add(new FieldDTO {});
-
+        _fieldList.Add(new FieldDTO {});
     }
 
     private void RemoveItem(FieldDTO item)
     {
         _fieldList.Remove(item);
-
     }
 
 

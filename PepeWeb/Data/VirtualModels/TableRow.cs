@@ -3,6 +3,6 @@
     public class TableRow
     {
         public int ItemId { get; set; }
-        public List<string> Values { get; set; }
+        public List<string>? Values { get; set; }
     }
 }

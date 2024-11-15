@@ -18,27 +18,35 @@
 <AuthorizeView>
     <Authorized>
        
-        <h1>@_table.Name</h1>
-        <button class="btn btn-success" type="button" @onclick="AddRecord">+ Add record</button>
-        <button class="btn btn-outline-warning" type="button" @onclick="EditTable">Edit table</button>
+        @if (_table != null)
+        {
+            <h1>@_table.Name</h1>
 
-        <table class="table">
-            <tr>
-                @foreach (FieldDTO col in _table.Columns)
-                {
-                    <th>@col.Name</th>
-                }
-            </tr>
-            @foreach (TableRow row in _table.Rows)
-            {
+            <button class="btn btn-success" type="button" @onclick="AddRecord">+ Add record</button>
+            <button class="btn btn-outline-warning" type="button" @onclick="EditTable">Edit table</button>
+
+            <table class="table">
                 <tr>
-                    @foreach (string val in row.Values)
+                    @foreach (FieldDTO col in _table.Columns)
                     {
-                        <td>@val</td>
+                        <th>@col.Name</th>
                     }
                 </tr>
-            }
-        </table>
+                @foreach (TableRow row in _table.Rows)
+                {
+                    <tr>
+                        @foreach (string val in row.Values)
+                        {
+                            <td>@val</td>
+                        }
+                    </tr>
+                }
+            </table>
+        }
+        else
+        {
+            <p>Table didn't load.</p>
+        }
 
     </Authorized>
     <NotAuthorized>
@@ -51,27 +59,18 @@
     [Parameter]
     public int tableId { get; set; }
 
+    private TableConstructDTO? _table;
 
-
-    private TableConstructDTO _table = new TableConstructDTO()
-    {
-        Columns = new List<FieldDTO>(),
-        Rows = new List<TableRow>() { new TableRow() { Values = new List<string>() } },
-
-    };
     protected override async Task OnParametersSetAsync()
     {
         // Get user's table
         TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
         _table = userTable;
-        //
-
     }
 
     private void AddRecord()
     {
-
-
+        // TODO
     }
 
     private void EditTable()

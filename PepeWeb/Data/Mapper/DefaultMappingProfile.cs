@@ -12,7 +12,6 @@ namespace PepeWeb.Data.Mapper
             CreateMap<Field, FieldDTO>();
             CreateMap<Value, ValueDTO>();
 
-
             CreateMap<TableDTO, Table>();
             CreateMap<FieldDTO, Field>();
             CreateMap<ValueDTO, Value>();
