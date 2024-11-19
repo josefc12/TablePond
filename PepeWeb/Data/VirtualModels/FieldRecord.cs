@@ -6,6 +6,7 @@ namespace PepeWeb.Data.VirtualModels
 {
     public class FieldRecord
     {
+        public int ItemId { get; set; }
         public string Name { get; set; }
         public CustomFieldType Type { get; set; }
         public string? TextValue { get; set; }

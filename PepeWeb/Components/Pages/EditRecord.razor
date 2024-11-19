@@ -12,6 +12,7 @@
 
 @inject PepeWeb.Services.TableManagementService tableManagementService
 @inject PepeWeb.Services.TableService tableService
+@inject PepeWeb.Services.ValueService valueService
 @inject NavigationManager navigationManager
 
 @attribute [Authorize]
@@ -23,33 +24,25 @@
 <AuthorizeView>
     <Authorized>
 
-        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="EditRecord">
+        <EditForm Context="editFormContext" Model="_rawValues" OnValidSubmit="Submit" FormName="EditRecord">
             <div class="row">
                 <div class="col-md-6">
 
                     @* Load fields of this table *@
-                    @foreach (var item in _fieldList)
+
+                    <p>@_rawValues.Count</p>
+
+                    @foreach (var item in _rawValues)
                     {
                         <div>
                             @* Display for field name/title *@
                             <label class="form-label">
-                                Field @item.Name (@item.Type)
+                                Field @item.Field.Name (@item.Field.Type)
                             </label>
 
                             @* Add input fields based on the type *@
-                            @switch (item.Type)
-                            {
-
-                                case CustomFieldType.Number:
-                                    <InputNumber class="form-control" @bind-Value="item.NumberValue" />
-                                    <ValidationMessage For="() => item.NumberValue" class="text-danger" />
-                                    break;
-                                default:
-                                    <InputText class="form-control" @bind-Value="item.TextValue" />
-                                    <ValidationMessage For="() => item.TextValue" class="text-danger" />
-                                    break;
-
-                            }
+                            <InputText class="form-control" @bind-Value="item.Val" />
+                            <ValidationMessage For="() => item.Val" class="text-danger" />
                         </div>
                     }
 
@@ -62,7 +55,9 @@
                     @* Display status messages, if there is a status message *@
                     @if (!string.IsNullOrEmpty(StatusMessage))
                     {
-                        <div class="alert alert-success mt-3">
+                        <div class="alert alert-success mt-3">  
+                                
+
                             @StatusMessage
                         </div>
                     }
@@ -96,7 +91,7 @@
     private string? StatusMessage;
     private string? ErrorMessage;
     private List<FieldRecord> _fieldList = new List<FieldRecord>();
-    private List<ValueDTO> _valueList = new List<ValueDTO>();
+    private List<ValueDTO> _rawValues = new List<ValueDTO>();
 
     private TableConstructDTO _table = new TableConstructDTO()
         {
@@ -115,25 +110,8 @@
         _tableNameInitial = _table.Name;
         _relatedTableObject = await tableService.GetTable(tableId); // Load only the table object itself
 
-        for (int k = 0;  k < _table.Columns.Count; k++)
-        {
-            var recordToAdd = new FieldRecord
-                {
-                    Name = _table.Columns[k].Name,
-                    Type = _table.Columns[k].Type,
-                    Field = _table.Columns[k]
-                };
-            if (_table.Columns[k].Type == CustomFieldType.Number)
-            {
-                recordToAdd.NumberValue = int.Parse(_table.Rows.Where(r => r.ItemId == itemId).FirstOrDefault().Values[k]);
-            }
-            else
-            {
-                recordToAdd.TextValue = _table.Rows.Where(r => r.ItemId == itemId).FirstOrDefault().Values[k];
-            }
+        _rawValues = await valueService.GetValuesByItemId(tableId,itemId);
 
-            _fieldList.Add(recordToAdd);
-        }
 
     }
 
@@ -143,30 +121,9 @@
         ErrorMessage = null;
         StatusMessage = null;
 
-        foreach (FieldRecord record in _fieldList)
-        {
-            string valueToAdd = "";
-            //TODO make dynamic and well.
-            if (record.NumberValue != null)
-            {
-                valueToAdd = record.NumberValue.ToString();
-            }
-            else if (record.TextValue != null)
-            {
-                valueToAdd = record.TextValue;
-            }
-
-            _valueList.Add(new ValueDTO
-                {
-                    Val = valueToAdd,
-                    Field = record.Field
-                }
-            );
-        }
-
         try
         {
-            await tableManagementService.AddRecord(_relatedTableObject.Id, _valueList);
+            await tableManagementService.EditRecord(_rawValues);
             StatusMessage = "Record added successfully!";
         }
         catch (Exception ex)

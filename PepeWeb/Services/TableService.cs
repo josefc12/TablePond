@@ -65,12 +65,12 @@ namespace PepeWeb.Services
 
             if (userTable != null)
             {
-                for (int i = 00; i < userTable.ItemAmount; i++)
+                for (int i = 0; i < userTable.ItemAmount; i++)
                 {
 
                     // Collect values and assign them to a row
                     var rowValues = tableValues.Where(v => v.ItemId == i+1).ToList();
-                    var row = new TableRow() { ItemId = i, Values = new List<string>() };
+                    var row = new TableRow() { ItemId = i+1, Values = new List<string>() };
                     foreach (var field in tableFields)
                     { 
                         var value = rowValues.Where(vr => vr.Field.Id == field.Id).FirstOrDefault();

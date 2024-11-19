@@ -158,6 +158,39 @@ namespace PepeWeb.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task EditRecord(List<ValueDTO> valueList)
+        {
+            foreach (var valueDto in valueList)
+            {
+                // Find the existing Value entity in the database
+                var existingValue = await _context.Values
+                    .Include(v => v.Table) // Include related table entity if needed
+                    .Include(v => v.Field) // Include related field entity if needed
+                    .FirstOrDefaultAsync(v => v.Id == valueDto.Id);
+
+                if (existingValue == null)
+                {
+                    throw new Exception($"Value with ID {valueDto.Id} not found.");
+                }
+
+                // Update the fields of the existing entity with the new values from the DTO
+                existingValue.Val = valueDto.Val;
+
+                // If needed, update other properties of the entity here
+                if (valueDto.Field != null)
+                {
+                    var field = await _context.Fields.FirstOrDefaultAsync(f => f.Id == valueDto.Field.Id);
+                    if (field != null)
+                    {
+                        existingValue.Field = field; // Ensure the Field reference is properly resolved
+                    }
+                }
+            }
+
+            // Save changes to the database
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> TableExists(string tableName)
         {
             if (await _context.Tables.Where(t => t.Name == tableName).FirstOrDefaultAsync() == null)
