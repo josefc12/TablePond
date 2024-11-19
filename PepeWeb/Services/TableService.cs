@@ -35,6 +35,7 @@ namespace PepeWeb.Services
             // Load user's tables
             var userTables = await _context.Tables
                                    .Where(t => t.UserId == _userId)
+                                   .OrderBy(x => x.Name)
                                    .ToListAsync();
 
             List<TableDTO> userTableDTOs = _mapper.Map<List<TableDTO>>(userTables);
@@ -64,11 +65,11 @@ namespace PepeWeb.Services
 
             if (userTable != null)
             {
-                for (int i = 0; i < userTable.ItemAmount; i++)
+                for (int i = 00; i < userTable.ItemAmount; i++)
                 {
 
                     // Collect values and assign them to a row
-                    var rowValues = tableValues.Where(v => v.ItemId == i).ToList();
+                    var rowValues = tableValues.Where(v => v.ItemId == i+1).ToList();
                     var row = new TableRow() { ItemId = i, Values = new List<string>() };
                     foreach (var field in tableFields)
                     { 

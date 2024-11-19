@@ -168,15 +168,13 @@
             ErrorMessage = "Error. User or table missing.";
         }
 
+        
         // If the table was actually created and exists yet, navigate to it
         if (_newTable != null)
         {
             navigationManager.NavigateTo($"/table/{_newTable.Id}", true);
         }
-        else
-        {
-            ErrorMessage = "Error. Created table not found.";
-        }
+        
 
     }
 

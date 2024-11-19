@@ -1,0 +1,184 @@
+﻿@page "/table/{tableId:int}/edit/{itemId:int}"
+
+@rendermode InteractiveServer
+
+@using Microsoft.AspNetCore.Authorization
+@using System.Diagnostics
+@using PepeWeb.Data.Models
+@using PepeWeb.Data.Enums
+@using PepeWeb.Data.VirtualModels
+@using System.Security.Claims
+@using PepeWeb.Data.DTO
+
+@inject PepeWeb.Services.TableManagementService tableManagementService
+@inject PepeWeb.Services.TableService tableService
+@inject NavigationManager navigationManager
+
+@attribute [Authorize]
+
+<PageTitle>Edit record</PageTitle>
+
+<h1>@_tableName - Edit record</h1>
+
+<AuthorizeView>
+    <Authorized>
+
+        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="EditRecord">
+            <div class="row">
+                <div class="col-md-6">
+
+                    @* Load fields of this table *@
+                    @foreach (var item in _fieldList)
+                    {
+                        <div>
+                            @* Display for field name/title *@
+                            <label class="form-label">
+                                Field @item.Name (@item.Type)
+                            </label>
+
+                            @* Add input fields based on the type *@
+                            @switch (item.Type)
+                            {
+
+                                case CustomFieldType.Number:
+                                    <InputNumber class="form-control" @bind-Value="item.NumberValue" />
+                                    <ValidationMessage For="() => item.NumberValue" class="text-danger" />
+                                    break;
+                                default:
+                                    <InputText class="form-control" @bind-Value="item.TextValue" />
+                                    <ValidationMessage For="() => item.TextValue" class="text-danger" />
+                                    break;
+
+                            }
+                        </div>
+                    }
+
+                    <br />
+                    <hr />
+
+                    @* Button that updates the table *@
+                    <button class="btn btn-success" type="submit">Change record and return</button>
+
+                    @* Display status messages, if there is a status message *@
+                    @if (!string.IsNullOrEmpty(StatusMessage))
+                    {
+                        <div class="alert alert-success mt-3">
+                            @StatusMessage
+                        </div>
+                    }
+                    @if (!string.IsNullOrEmpty(ErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3">
+                            @ErrorMessage
+                        </div>
+                    }
+
+                </div>
+            </div>
+        </EditForm>
+
+    </Authorized>
+    <NotAuthorized>
+        You are not authorized to view this content. Please log in.
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+
+    [Parameter]
+    public int tableId { get; set; }
+    [Parameter]
+    public int itemId { get; set; }
+
+    private string? _tableName;
+    private string? _tableNameInitial;
+    private TableDTO? _relatedTableObject;
+    private string? StatusMessage;
+    private string? ErrorMessage;
+    private List<FieldRecord> _fieldList = new List<FieldRecord>();
+    private List<ValueDTO> _valueList = new List<ValueDTO>();
+
+    private TableConstructDTO _table = new TableConstructDTO()
+        {
+            Columns = new List<FieldDTO>(),
+            Rows = new List<TableRow>() { new TableRow() { Values = new List<string>() } },
+
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load table data - table to fields relationship
+        TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
+
+        _table = userTable;
+        _tableName = _table.Name;
+        _tableNameInitial = _table.Name;
+        _relatedTableObject = await tableService.GetTable(tableId); // Load only the table object itself
+
+        for (int k = 0;  k < _table.Columns.Count; k++)
+        {
+            var recordToAdd = new FieldRecord
+                {
+                    Name = _table.Columns[k].Name,
+                    Type = _table.Columns[k].Type,
+                    Field = _table.Columns[k]
+                };
+            if (_table.Columns[k].Type == CustomFieldType.Number)
+            {
+                recordToAdd.NumberValue = int.Parse(_table.Rows.Where(r => r.ItemId == itemId).FirstOrDefault().Values[k]);
+            }
+            else
+            {
+                recordToAdd.TextValue = _table.Rows.Where(r => r.ItemId == itemId).FirstOrDefault().Values[k];
+            }
+
+            _fieldList.Add(recordToAdd);
+        }
+
+    }
+
+    private async Task Submit()
+    {
+
+        ErrorMessage = null;
+        StatusMessage = null;
+
+        foreach (FieldRecord record in _fieldList)
+        {
+            string valueToAdd = "";
+            //TODO make dynamic and well.
+            if (record.NumberValue != null)
+            {
+                valueToAdd = record.NumberValue.ToString();
+            }
+            else if (record.TextValue != null)
+            {
+                valueToAdd = record.TextValue;
+            }
+
+            _valueList.Add(new ValueDTO
+                {
+                    Val = valueToAdd,
+                    Field = record.Field
+                }
+            );
+        }
+
+        try
+        {
+            await tableManagementService.AddRecord(_relatedTableObject.Id, _valueList);
+            StatusMessage = "Record added successfully!";
+        }
+        catch (Exception ex)
+        {
+            // Log error if needed
+            Debug.WriteLine($"Error creating record: {ex.Message}");
+            ErrorMessage = "An error occurred while creating the record. Please try again.";
+        }
+
+        navigationManager.NavigateTo($"/table/{tableId}", true);
+
+    }
+
+}
+

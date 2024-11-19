@@ -144,7 +144,7 @@
         ErrorMessage = null;
         StatusMessage = null;
 
-        if (_tableName != null && _tableNameInitial != _tableName && await tableManagementService.TableExists(_tableName))
+        if (_tableName != null && (_tableNameInitial == _tableName || await tableManagementService.TableExists(_tableName) == false))
         {
             _table.Name = _tableName;
             _table.Columns = _fieldList;

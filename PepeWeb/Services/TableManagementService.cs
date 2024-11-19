@@ -120,15 +120,51 @@ namespace PepeWeb.Services
             return;
         }
 
+        public async Task AddRecord(int tableId, List<ValueDTO> valueList)
+        {
+            // Get the tracked table entity
+            var table = await _context.Tables.FirstOrDefaultAsync(t => t.Id == tableId);
+            if (table == null)
+                throw new Exception("Table not found.");
+
+            // Increment item count
+            int newAmount = table.ItemAmount += 1;
+            table.ItemAmount = newAmount;
+
+            // Map ValueDTO to Value entities
+            var values = _mapper.Map<List<Value>>(valueList);
+
+            foreach (var value in values)
+            {
+                // Assign the existing table entity to avoid EF tracking duplicates
+                value.Table = table;
+
+                // If a Field is referenced, resolve it to a tracked entity
+                if (value.Field != null)
+                {
+                    var field = await _context.Fields.FirstOrDefaultAsync(f => f.Id == value.Field.Id);
+                    if (field != null)
+                    {
+                        value.Field = field; // Use the tracked field entity
+                    }
+                }
+
+                // Assign the incremented item ID
+                value.ItemId = newAmount;
+            }
+
+            // Add and save
+            _context.Values.AddRange(values);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> TableExists(string tableName)
         {
-
             if (await _context.Tables.Where(t => t.Name == tableName).FirstOrDefaultAsync() == null)
             {
                 return false;
             }
             return true;
         }
-
     }
 }

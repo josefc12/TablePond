@@ -20,27 +20,40 @@
        
         @if (_table != null)
         {
-            <h1>@_table.Name</h1>
-
-            <button class="btn btn-success" type="button" @onclick="AddRecord">+ Add record</button>
-            <button class="btn btn-outline-warning" type="button" @onclick="EditTable">Edit table</button>
-
-            <table class="table">
-                <tr>
-                    @foreach (FieldDTO col in _table.Columns)
-                    {
-                        <th>@col.Name</th>
-                    }
-                </tr>
-                @foreach (TableRow row in _table.Rows)
-                {
+            <div class="col-lg d-flex align-items-center justify-content-between">
+                <h1>@_table.Name</h1>
+                <div>
+                    <button class="btn btn-success" type="button" @onclick="AddRecord">+ Add record</button>
+                    <button class="btn btn-outline-warning" type="button" @onclick="EditTable">Edit table</button>
+                </div>
+                
+            </div>
+            <br />
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        @foreach (string val in row.Values)
+                        <th scope="col">Id</th>
+                        @foreach (FieldDTO col in _table.Columns)
                         {
-                            <td>@val</td>
+                            <th scope="col">@col.Name</th>
                         }
+                        <th scope="col">Edit record</th>
                     </tr>
-                }
+                </thead>
+                <tbody>
+                    @foreach (TableRow row in _table.Rows)
+                    {
+                        var iId = @row.ItemId;
+                        <tr>
+                            <td>@iId</td>
+                            @foreach (string val in row.Values)
+                            {
+                                <td>@val</td>
+                            }
+                            <td><button class="btn btn-outline-primary" type="button" @onclick="(() => EditRecord(iId))">Edit</button></td>
+                        </tr>
+                    }
+                </tbody>
             </table>
         }
         else
@@ -70,7 +83,14 @@
 
     private void AddRecord()
     {
-        // TODO
+        var addRecordUrl = $"table/{tableId}/add";
+        navigationManager.NavigateTo(addRecordUrl);
+    }
+
+    private void EditRecord(int itemId)
+    {
+        var addRecordUrl = $"table/{tableId}/edit/{itemId}";
+        navigationManager.NavigateTo(addRecordUrl);
     }
 
     private void EditTable()
