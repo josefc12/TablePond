@@ -1,8 +1,11 @@
 ﻿@page "/Account/Manage/Invite"
 
 @using System.ComponentModel.DataAnnotations
+@using PepeWeb.Data.DTO
+@using PepeWeb.Services
 
 @inject IdentityUserAccessor UserAccessor
+@inject InvitationService invitationService
 
 <PageTitle>Create Invite</PageTitle>
 
@@ -22,6 +25,45 @@
             </div>
             <button type="submit" class="w-100 btn btn-lg btn-primary">Invite</button>
         </EditForm>
+        @* Display status messages, if there is a status message *@
+        @if (!string.IsNullOrEmpty(SuccessMessage))
+        {
+            <div class="alert alert-success mt-3">
+                @SuccessMessage
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(UsageMessage))
+        {
+            <div class="alert alert-success mt-3">
+                @UsageMessage
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">
+                @ErrorMessage
+            </div>
+        }
+    </div>
+    <div class="col-md-6">
+        <p>Created invitations</p>
+        @foreach (var invitation in _userInvitations)
+        {
+            <div class="card text-bg-light mb-3">
+                <div class="card-header">@invitation.EmailAddress</div>
+                <div class="card-body">
+                    @if (invitation.IsActive)
+                    {
+                        <p class="card-text text-primary">Invitation pending. (@invitation.Code)</p>
+                    }
+                    else
+                    {
+                        <p class="card-text text-success">User registered. (@invitation.Code)</p>
+                    }
+
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -37,14 +79,38 @@
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
 
+    private string? _invitationCode;
+    private List<InvitationDTO> _userInvitations = new List<InvitationDTO>();
+
+    private string? SuccessMessage;
+    private string? ErrorMessage;
+    private string? UsageMessage;
+
     protected override async Task OnInitializedAsync()
     {
         _ = await UserAccessor.GetRequiredUserAsync(HttpContext);
+
+
+        _userInvitations = await invitationService.GetUserInvitations();
     }
 
     private async Task InviteUser(EditContext editContext)
     {
-        
+
+        SuccessMessage = null;
+        ErrorMessage = null;
+        UsageMessage = null;
+
+        _invitationCode = await invitationService.InviteUser(Input.Email);
+        if (_invitationCode != null)
+        {
+            SuccessMessage = "User invited! Send this code to them: " + _invitationCode;
+            UsageMessage = "Use in the url like so: '(your website url here)/Account/Register/(your code here).";
+        }
+        else
+        {
+            ErrorMessage = "User couldn't be invited, or was already invited!";
+        }
     }
 
     private sealed class InputModel

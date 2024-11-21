@@ -9,5 +9,6 @@ namespace PepeWeb.Data
         public DbSet<Table> Tables { get; set; }
         public DbSet<Field> Fields { get; set; }
         public DbSet<Value> Values { get; set; }
+        public DbSet<Invitation> Invitations { get; set; }
     }
 }

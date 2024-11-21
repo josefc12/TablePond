@@ -48,7 +48,16 @@
                             <td>@iId</td>
                             @foreach (string val in row.Values)
                             {
-                                <td>@val</td>
+                                @if (IsLink(val))
+                                {
+                                    string formatted = FormatLink(val);
+                                    <td><a href=@formatted>Link</a></td>
+                                }
+                                else
+                                {
+                                    <td>@val</td>
+                                }
+                                
                             }
                             <td><button class="btn btn-outline-primary" type="button" @onclick="(() => EditRecord(iId))">Edit</button></td>
                         </tr>
@@ -104,6 +113,39 @@
             throw new Exception(e.Message);
         }
 
+    }
+
+    private bool IsLink(string text)
+    {
+
+        if (text.Length < 4)
+        {
+            return false;
+        }
+
+        string[] models = new string[3] { "www.", "http://", "https://" };
+
+        foreach (string m in models)
+        {
+            if(text.Length >= m.Length)
+            {
+                string tSub = text.Substring(0, m.Length);
+                if (m == tSub)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private string FormatLink(string link)
+    {
+        if (link.Substring(0, 7) != "http://" && link.Substring(0, 8) != "https://")
+        {
+            return "http://" + link;
+        }
+        return link;
     }
 
 }

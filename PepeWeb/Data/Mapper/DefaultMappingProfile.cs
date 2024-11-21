@@ -11,10 +11,12 @@ namespace PepeWeb.Data.Mapper
             CreateMap<Table, TableDTO>();
             CreateMap<Field, FieldDTO>();
             CreateMap<Value, ValueDTO>();
+            CreateMap<Invitation, InvitationDTO>();
 
             CreateMap<TableDTO, Table>();
             CreateMap<FieldDTO, Field>();
             CreateMap<ValueDTO, Value>();
+            CreateMap<InvitationDTO, Invitation>();
         }
     }
 }

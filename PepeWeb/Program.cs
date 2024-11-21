@@ -1,12 +1,15 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PepeWeb.Components;
 using PepeWeb.Components.Account;
 using PepeWeb.Data;
 using PepeWeb.Data.Mapper;
 using PepeWeb.Services;
+using System.Diagnostics;
+using static System.Formats.Asn1.AsnWriter;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +27,7 @@ builder.Services.AddScoped<TableService>();
 builder.Services.AddScoped<ValueService>();
 builder.Services.AddScoped<IdentityUserAccessor>();
 builder.Services.AddScoped<IdentityRedirectManager>();
+builder.Services.AddScoped<InvitationService>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
@@ -45,6 +49,33 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
 var app = builder.Build();
+
+var scope = app.Services.CreateScope();
+var services = scope.ServiceProvider;
+var store = services.GetRequiredService<IUserStore<ApplicationUser>>();
+var context = services.GetRequiredService<ApplicationDbContext>();
+var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+context.Database.Migrate();
+var adminExists = await context.Users.Where(u => u.Email == "admin").FirstOrDefaultAsync();
+if (adminExists == null)
+{
+    try
+    {
+        ApplicationUser newAdmin = new ApplicationUser();
+        newAdmin.EmailConfirmed = true;
+        await store.SetUserNameAsync(newAdmin, "admin", CancellationToken.None);
+        var emailStore = (IUserEmailStore<ApplicationUser>)store;
+        await emailStore.SetEmailAsync(newAdmin, "admin", CancellationToken.None);
+        var result = await userManager.CreateAsync(newAdmin, "Ap@T(^fhM3u*;mE5<:K_e");
+        Debug.WriteLine("User created");
+    }
+    catch
+    {
+        throw new Exception("Didnt work");
+    }
+    
+}
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

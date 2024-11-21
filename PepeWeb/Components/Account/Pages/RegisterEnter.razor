@@ -1,0 +1,60 @@
+﻿@page "/Account/Register"
+
+@rendermode InteractiveServer
+
+@using PepeWeb.Services
+@using System.Diagnostics
+
+
+@inject InvitationService invitationService
+@inject NavigationManager navigationManager
+
+<PageTitle>Register</PageTitle>
+
+<h1>Enter your invitation code</h1>
+
+
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="_invitationCode" method="post" OnValidSubmit="SubmitCode" FormName="submitCode">
+            <hr />
+            <div class="form-floating mb-3">
+                <InputText class="form-control" placeholder="Code" @bind-Value="_invitationCode" />
+            </div>
+            <button type="submit" class="w-100 btn btn-lg btn-primary">Submit</button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3">
+                @ErrorMessage
+            </div>
+        }
+
+    </div>
+</div>
+
+
+
+@code {
+    private string _invitationCode { get; set; } = "";
+    private bool _isCodeValid = false;
+    private string? ErrorMessage;
+
+    public async Task SubmitCode()
+    {
+
+        _isCodeValid = await invitationService.CheckCodeValidity(_invitationCode);
+
+        if (_isCodeValid == false)
+        {
+            ErrorMessage = "Wrong code.";
+            return;
+        }
+
+        var urlCode = $"Account/Register/{_invitationCode}";
+        navigationManager.NavigateTo(urlCode);
+
+    }
+
+}

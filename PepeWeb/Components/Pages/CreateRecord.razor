@@ -23,11 +23,11 @@
 <AuthorizeView>
     <Authorized>
 
-        <EditForm Context="editFormContext" Model="_fieldList" OnValidSubmit="Submit" FormName="AddRecord">
+        <EditForm Context="addRecordContext" Model="_fieldList" OnValidSubmit="Submit" FormName="AddRecord">
             <div class="row">
                 <div class="col-md-6">
 
-                    @* Load fields of this table *@
+                    @* Load fields of this record *@
                     @foreach (var item in _fieldList)
                     {
                         <div>
@@ -56,7 +56,7 @@
                     <br />
                     <hr />
 
-                    @* Button that updates the table *@
+                    @* Button that adds the record *@
                     <button class="btn btn-success" type="submit">Add record and return</button>
 
                     @* Display status messages, if there is a status message *@
@@ -91,8 +91,10 @@
     private string? _tableName;
     private string? _tableNameInitial;
     private TableDTO? _relatedTableObject;
+
     private string? StatusMessage;
     private string? ErrorMessage;
+
     private List<FieldRecord> _fieldList = new List<FieldRecord>();
     private List<ValueDTO> _valueList = new List<ValueDTO>();
 
@@ -105,24 +107,30 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Load table data - table to fields relationship
+        // Load table data
         TableConstructDTO userTable = await tableService.GetUserTableData(tableId);
 
-        _table = userTable;
-        _tableName = _table.Name;
-        _tableNameInitial = _table.Name;
-        _relatedTableObject = await tableService.GetTable(tableId); // Load only the table object itself
-
-        foreach (FieldDTO field in _table.Columns)
+        if (userTable == null)
         {
-            _fieldList.Add(new FieldRecord
+            throw new Exception("Table construct returned as null");
+        }
+
+        _tableName = userTable.Name;
+        _tableNameInitial = userTable.Name;
+
+        if (userTable.Columns != null)
+        {
+            foreach (FieldDTO field in userTable.Columns)
             {
-                    Name = field.Name,
-                    Type = field.Type,
-                    TextValue = null,
-                    NumberValue = null,
-                    Field = field
-            });
+                _fieldList.Add(new FieldRecord
+                    {
+                        Name = field.Name,
+                        Type = field.Type,
+                        TextValue = null,
+                        NumberValue = null,
+                        Field = field
+                    });
+            }
         }
 
     }
@@ -136,10 +144,10 @@
         foreach (FieldRecord record in _fieldList)
         {
             string valueToAdd = "";
-            //TODO make dynamic and well.
+
             if (record.NumberValue != null)
             {
-                valueToAdd = record.NumberValue.ToString();
+                valueToAdd = record.NumberValue.ToString() ?? "";
             }
             else if (record.TextValue != null)
             {
@@ -156,7 +164,7 @@
 
         try
         {
-            await tableManagementService.AddRecord(_relatedTableObject.Id, _valueList);
+            await tableManagementService.AddRecord(tableId, _valueList);
             StatusMessage = "Record added successfully!";
         }
         catch (Exception ex)

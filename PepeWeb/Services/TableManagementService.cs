@@ -122,6 +122,7 @@ namespace PepeWeb.Services
 
         public async Task AddRecord(int tableId, List<ValueDTO> valueList)
         {
+
             // Get the tracked table entity
             var table = await _context.Tables.FirstOrDefaultAsync(t => t.Id == tableId);
             if (table == null)
