@@ -1,4 +1,4 @@
-# 🐸 Data Pond
+# 🐸 Table Pond
 A web app that allows you to define your own tables, fields and values.  
 Meant for small scale self-hosting or localhost deployment.  
 
