@@ -4,11 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PepeWeb.Data;
+using TablePond.Data;
 
 #nullable disable
 
-namespace PepeWeb.Migrations
+namespace TablePond.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
     partial class ApplicationDbContextModelSnapshot : ModelSnapshot
@@ -154,7 +154,7 @@ namespace PepeWeb.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.ApplicationUser", b =>
+            modelBuilder.Entity("TablePond.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("text");
@@ -218,7 +218,7 @@ namespace PepeWeb.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Field", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Field", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -242,7 +242,7 @@ namespace PepeWeb.Migrations
                     b.ToTable("Fields");
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Invitation", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Invitation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -269,7 +269,7 @@ namespace PepeWeb.Migrations
                     b.ToTable("Invitations");
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Table", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Table", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -291,7 +291,7 @@ namespace PepeWeb.Migrations
                     b.ToTable("Tables");
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Value", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Value", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -331,7 +331,7 @@ namespace PepeWeb.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
-                    b.HasOne("PepeWeb.Data.ApplicationUser", null)
+                    b.HasOne("TablePond.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -340,7 +340,7 @@ namespace PepeWeb.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.HasOne("PepeWeb.Data.ApplicationUser", null)
+                    b.HasOne("TablePond.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -355,7 +355,7 @@ namespace PepeWeb.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("PepeWeb.Data.ApplicationUser", null)
+                    b.HasOne("TablePond.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -364,29 +364,29 @@ namespace PepeWeb.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
                 {
-                    b.HasOne("PepeWeb.Data.ApplicationUser", null)
+                    b.HasOne("TablePond.Data.ApplicationUser", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Field", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Field", b =>
                 {
-                    b.HasOne("PepeWeb.Data.Models.Table", "Table")
+                    b.HasOne("TablePond.Data.Models.Table", "Table")
                         .WithMany()
                         .HasForeignKey("TableId");
 
                     b.Navigation("Table");
                 });
 
-            modelBuilder.Entity("PepeWeb.Data.Models.Value", b =>
+            modelBuilder.Entity("TablePond.Data.Models.Value", b =>
                 {
-                    b.HasOne("PepeWeb.Data.Models.Field", "Field")
+                    b.HasOne("TablePond.Data.Models.Field", "Field")
                         .WithMany()
                         .HasForeignKey("FieldId");
 
-                    b.HasOne("PepeWeb.Data.Models.Table", "Table")
+                    b.HasOne("TablePond.Data.Models.Table", "Table")
                         .WithMany()
                         .HasForeignKey("TableId");
 

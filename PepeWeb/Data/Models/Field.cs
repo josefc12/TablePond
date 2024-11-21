@@ -1,7 +1,7 @@
-﻿using PepeWeb.Data.Enums;
+﻿using TablePond.Data.Enums;
 using System.ComponentModel.DataAnnotations;
 
-namespace PepeWeb.Data.Models
+namespace TablePond.Data.Models
 {
     public class Field
     {

@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using PepeWeb.Data;
-using PepeWeb.Data.DTO;
-using PepeWeb.Data.Models;
-using PepeWeb.Data.VirtualModels;
+using TablePond.Data;
+using TablePond.Data.DTO;
+using TablePond.Data.Models;
+using TablePond.Data.VirtualModels;
 
-namespace PepeWeb.Services
+namespace TablePond.Services
 {
     public class TableManagementService
     {

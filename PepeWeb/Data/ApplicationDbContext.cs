@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PepeWeb.Data.Models;
+using TablePond.Data.Models;
 
-namespace PepeWeb.Data
+namespace TablePond.Data
 {
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {

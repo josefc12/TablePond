@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace PepeWeb.Migrations
+namespace TablePond.Migrations
 {
     /// <inheritdoc />
     public partial class Invitations2 : Migration

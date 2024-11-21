@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using PepeWeb.Data.DTO;
-using PepeWeb.Data.Models;
+using TablePond.Data.DTO;
+using TablePond.Data.Models;
 
-namespace PepeWeb.Data.Mapper
+namespace TablePond.Data.Mapper
 {
     public class DefaultMappingProfile : Profile
     {

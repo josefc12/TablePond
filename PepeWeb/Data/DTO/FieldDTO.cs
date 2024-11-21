@@ -1,6 +1,6 @@
-﻿using PepeWeb.Data.Enums;
+﻿using TablePond.Data.Enums;
 
-namespace PepeWeb.Data.DTO
+namespace TablePond.Data.DTO
 {
     public class FieldDTO
     {

@@ -1,4 +1,4 @@
-﻿namespace PepeWeb.Data.Enums
+﻿namespace TablePond.Data.Enums
 {
     public enum CustomFieldType
     {

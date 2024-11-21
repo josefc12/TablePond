@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
-using PepeWeb.Data;
-using PepeWeb.Data.DTO;
-using PepeWeb.Data.VirtualModels;
+using TablePond.Data;
+using TablePond.Data.DTO;
+using TablePond.Data.VirtualModels;
 using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using Microsoft.EntityFrameworkCore;
 
-namespace PepeWeb.Services
+namespace TablePond.Services
 {
     public class TableService
     {

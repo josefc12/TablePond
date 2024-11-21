@@ -1,4 +1,4 @@
-﻿namespace PepeWeb.Data.DTO
+﻿namespace TablePond.Data.DTO
 {
     public class TableDTO
     {

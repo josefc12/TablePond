@@ -1,13 +1,13 @@
 ﻿@page "/table/{tableId:int}"
 
 @using Microsoft.AspNetCore.Authorization
-@using PepeWeb.Data.DTO;
-@using PepeWeb.Data.VirtualModels;
+@using TablePond.Data.DTO;
+@using TablePond.Data.VirtualModels;
 @using System.Diagnostics
 
 @rendermode InteractiveServer
 
-@inject PepeWeb.Services.TableService tableService
+@inject TablePond.Services.TableService tableService
 @inject NavigationManager navigationManager
 
 @attribute [StreamRendering]

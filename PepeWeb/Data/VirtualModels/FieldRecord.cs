@@ -1,8 +1,8 @@
-﻿using PepeWeb.Data.DTO;
-using PepeWeb.Data.Enums;
+﻿using TablePond.Data.DTO;
+using TablePond.Data.Enums;
 using System.Globalization;
 
-namespace PepeWeb.Data.VirtualModels
+namespace TablePond.Data.VirtualModels
 {
     public class FieldRecord
     {

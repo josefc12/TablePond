@@ -1,4 +1,4 @@
-﻿namespace PepeWeb.Data.VirtualModels
+﻿namespace TablePond.Data.VirtualModels
 {
     public class TableRow
     {

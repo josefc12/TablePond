@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using PepeWeb.Data;
+using TablePond.Data;
 
-namespace PepeWeb.Components.Account
+namespace TablePond.Components.Account
 {
     internal sealed class IdentityUserAccessor(UserManager<ApplicationUser> userManager, IdentityRedirectManager redirectManager)
     {

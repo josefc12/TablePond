@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using System.Diagnostics.CodeAnalysis;
 
-namespace PepeWeb.Components.Account
+namespace TablePond.Components.Account
 {
     internal sealed class IdentityRedirectManager(NavigationManager navigationManager)
     {

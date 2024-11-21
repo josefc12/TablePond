@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using PepeWeb.Components.Account.Pages;
-using PepeWeb.Components.Account.Pages.Manage;
-using PepeWeb.Data;
+using TablePond.Components.Account.Pages;
+using TablePond.Components.Account.Pages.Manage;
+using TablePond.Data;
 using System.Security.Claims;
 using System.Text.Json;
 

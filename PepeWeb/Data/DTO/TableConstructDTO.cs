@@ -1,6 +1,6 @@
-﻿using PepeWeb.Data.VirtualModels;
+﻿using TablePond.Data.VirtualModels;
 
-namespace PepeWeb.Data.DTO
+namespace TablePond.Data.DTO
 {
     public class TableConstructDTO
     {

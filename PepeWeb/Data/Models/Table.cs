@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace PepeWeb.Data.Models
+namespace TablePond.Data.Models
 {
     public class Table
     {

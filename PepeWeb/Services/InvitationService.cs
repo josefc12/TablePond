@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
-using PepeWeb.Data;
-using PepeWeb.Data.DTO;
-using PepeWeb.Data.Models;
+using TablePond.Data;
+using TablePond.Data.DTO;
+using TablePond.Data.Models;
 using System;
 using System.Diagnostics;
 using System.Security.Claims;
 
-namespace PepeWeb.Services
+namespace TablePond.Services
 {
     public class InvitationService
     {

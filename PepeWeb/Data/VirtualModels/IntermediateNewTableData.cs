@@ -1,7 +1,7 @@
-﻿using PepeWeb.Data.Models;
-using PepeWeb.Data.DTO;
+﻿using TablePond.Data.Models;
+using TablePond.Data.DTO;
 
-namespace PepeWeb.Data.VirtualModels
+namespace TablePond.Data.VirtualModels
 {
     public class IntermediateNewTableData
     {

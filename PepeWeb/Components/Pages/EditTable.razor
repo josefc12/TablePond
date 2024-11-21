@@ -4,14 +4,14 @@
 
 @using Microsoft.AspNetCore.Authorization
 @using System.Diagnostics
-@using PepeWeb.Data.Models
-@using PepeWeb.Data.Enums
-@using PepeWeb.Data.VirtualModels
+@using TablePond.Data.Models
+@using TablePond.Data.Enums
+@using TablePond.Data.VirtualModels
 @using System.Security.Claims
-@using PepeWeb.Data.DTO
+@using TablePond.Data.DTO
 
-@inject PepeWeb.Services.TableManagementService tableManagementService
-@inject PepeWeb.Services.TableService tableService
+@inject TablePond.Services.TableManagementService tableManagementService
+@inject TablePond.Services.TableService tableService
 @inject NavigationManager navigationManager
 
 @attribute [Authorize]

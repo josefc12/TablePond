@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PepeWeb.Components;
-using PepeWeb.Components.Account;
-using PepeWeb.Data;
-using PepeWeb.Data.Mapper;
-using PepeWeb.Services;
+using TablePond.Components;
+using TablePond.Components.Account;
+using TablePond.Data;
+using TablePond.Data.Mapper;
+using TablePond.Services;
 using System.Diagnostics;
 using static System.Formats.Asn1.AsnWriter;
 
