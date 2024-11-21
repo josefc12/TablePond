@@ -4,7 +4,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>aspnet-PepeWeb-51ea6801-a958-42c1-a036-dea4d46ed869</UserSecretsId>
+    <UserSecretsId>aspnet-TablePond-51ea6801-a958-42c1-a036-dea4d46ed869</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,6 +25,7 @@
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
     <Folder Include="Migrations\" />
+	 <Folder Include="Components\" />
     <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
